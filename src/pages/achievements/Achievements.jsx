@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Editor } from "primereact/editor";
+import TiptapEditor from "../../components/TiptapEditor";
 import { useDispatch, useSelector } from "react-redux";
 import adminBanner from "../../assets/banners/bg.jpg";
 import {
@@ -47,6 +47,17 @@ const Achievements = () => {
   const itemsPerPage = 10;
   const [currentPage, setCurrentPage] = useState(1);
 
+  const getPlainText = (html, maxLength = 50) => {
+    if (!html) return "";
+    const div = document.createElement("div");
+    div.innerHTML = html;
+    let text = div.textContent || "";
+    if (text.length > maxLength) {
+      text = text.slice(0, maxLength) + "...";
+    }
+    return text;
+  };
+
   /* ===== HANDLERS ===== */
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -93,15 +104,11 @@ const Achievements = () => {
   };
 
   const handleDelete = (id) => {
-
-      const currentUserId = authUser?.id || null;
-      dispatch(deleteAchievement({ id: id, user_id: currentUserId })).then(
-        () => {
-          showSuccess("Achievement deleted successfully");
-          dispatch(getAllAchievements());
-        },
-      );
-    
+    const currentUserId = authUser?.id || null;
+    dispatch(deleteAchievement({ id: id, user_id: currentUserId })).then(() => {
+      showSuccess("Achievement deleted successfully");
+      dispatch(getAllAchievements());
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -356,14 +363,12 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Description
               </label>
-              <Editor
+              <TiptapEditor
                 value={formData.desc}
-                onTextChange={(e) =>
-                  setFormData((prev) => ({ ...prev, desc: e.htmlValue }))
+                onChange={(html) =>
+                  setFormData((prev) => ({ ...prev, desc: html }))
                 }
-                style={{ height: "160px" }}
-                readOnly={isFormDisabled}
-                className="w-full text-sm outline-none"
+                isReadOnly={isFormDisabled}
               />
             </div>
 
@@ -412,7 +417,7 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
               <tr>
                 <th className="px-4 py-3 font-medium">S.No</th>
                 <th className="px-4 py-3 font-medium">Title</th>
-                {/* <th className="px-4 py-3 font-medium">Link</th> */}
+                <th className="px-4 py-3 font-medium">Description</th>
                 <th className="px-4 py-3 font-medium">Image</th>
                 <th className="px-4 py-3 font-medium">Status</th>
                 {(canWrite || canDelete) && (
@@ -424,7 +429,7 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
             <tbody>
               {loading && achievements?.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="text-center py-4">
+                  <td colSpan="6" className="text-center py-4">
                     Loading...
                   </td>
                 </tr>
@@ -432,13 +437,13 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
                 currentData?.map((item, index) => (
                   <tr
                     key={item._id}
-                    className="border-b border-gray-200 hover:bg-gray-50"
+                    className="border-b border-gray-200 hover:bg-gray-50 transition-all duration-200 ease-in-out hover:scale-[1.01] hover:shadow-sm"
                   >
                     <td className="px-4 py-3">{startIndex + index + 1}.</td>
                     <td className="px-4 py-3 font-medium">{item.title}</td>
-                    {/* <td className="px-4 py-3 text-blue-600 underline">
-                                            {item.link}
-                                        </td> */}
+                    <td className="px-4 py-3 text-gray-600">
+                      {getPlainText(item.desc, 50)}
+                    </td>
                     <td className="px-4 py-3">
                       <img
                         src={item.image || "/placeholder.png"}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Editor } from "primereact/editor";
+import TiptapEditor from "../../components/TiptapEditor";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchObjectives,
@@ -8,7 +8,6 @@ import {
   deleteObjectiveThunk,
 } from "../../redux/slices/objective/objectiveSlice";
 import { showSuccess, showError } from "../../utils/toastService";
-import adminBanner from "../../assets/banners/bg.jpg";
 import useRoleRights from "../../hooks/useRoleRights";
 import { PageNames } from "../../utils/constants";
 
@@ -44,6 +43,21 @@ const Objective = () => {
   const itemsPerPage = 10;
   const [currentPage, setCurrentPage] = useState(1);
 
+  const getPlainText = (html, maxLength = 50) => {
+    if (!html) return "";
+
+    const div = document.createElement("div");
+    div.innerHTML = html;
+
+    let text = div.textContent || "";
+
+    if (text.length > maxLength) {
+      text = text.slice(0, maxLength) + "...";
+    }
+
+    return text;
+  };
+
   /* ===== FETCH DATA ===== */
   useEffect(() => {
     dispatch(fetchObjectives());
@@ -69,7 +83,7 @@ const Objective = () => {
       setFormData((prev) => ({
         ...prev,
         [name]: files[0],
-        [`${name}Preview`]: URL.createObjectURL(files[0]),
+        [`Preview`]: URL.createObjectURL(files[0]),
       }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: files ? files[0] : value }));
@@ -394,22 +408,12 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
                 Description
               </label>
 
-              <Editor
-                key={formData._id || "new-objective"}
+              <TiptapEditor
                 value={formData.desc}
-                readOnly={isFormDisabled}
-                onTextChange={(e) => {
-                  if (e.source === "user") {
-                    setFormData((prev) => ({ ...prev, desc: e.htmlValue }));
-                  }
-                }}
-                style={{
-                  height: "180px",
-                  borderRadius: "4px", // rounded
-                  borderBottom: "1px solid #e5e7eb", // border-gray-200
-                  overflow: "hidden", // corners properly clip ho
-                }}
-                className="w-full text-sm outline-none"
+                onChange={(html) =>
+                  setFormData((prev) => ({ ...prev, desc: html }))
+                }
+                isReadOnly={isFormDisabled}
               />
             </div>
             {/* META DESCRIPTION */}
@@ -474,6 +478,7 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
                 <th className="px-4 py-3 font-medium">S.No</th>
                 <th className="px-4 py-3 font-medium">Objective Title</th>
                 <th className="px-4 py-3 font-medium">Slug</th>
+                <th className="px-4 py-3 font-medium">Description</th>
                 <th className="px-4 py-3 font-medium">Logo</th>
                 <th className="px-4 py-3 font-medium">Image</th>
                 <th className="px-4 py-3 font-medium">Status</th>
@@ -486,7 +491,7 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
             <tbody>
               {loading && data?.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="text-center py-4">
+                  <td colSpan="7" className="text-center py-4">
                     Loading...
                   </td>
                 </tr>
@@ -499,6 +504,7 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
                     <td className="px-4 py-3">{startIndex + index + 1}.</td>
                     <td className="px-4 py-3 font-medium">{item.title}</td>
                     <td className="px-4 py-3 text-gray-500">{item.slug}</td>
+                    <td className="px-4 py-3">{getPlainText(item.desc, 50)}</td>
                     <td className="px-4 py-3">
                       <img
                         src={item.logo || "/placeholder.png"}

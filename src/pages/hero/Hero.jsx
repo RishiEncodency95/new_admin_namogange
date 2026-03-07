@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Editor } from "primereact/editor";
+import React, { useState, useEffect, useCallback } from "react";
+import TiptapEditor from "../../components/TiptapEditor";
 import { useDispatch, useSelector } from "react-redux";
 import useRoleRights from "../../hooks/useRoleRights";
 import { PageNames } from "../../utils/constants";
@@ -8,7 +8,6 @@ import {
   getAllHeroes,
   updateHero,
   deleteHero,
-  getHeroById,
 } from "../../redux/slices/hero/heroSlice";
 import { showSuccess, showError } from "../../utils/toastService";
 
@@ -31,6 +30,43 @@ const Hero = () => {
     status: "Active",
   });
 
+  // ✅ FIXED: Simple function to get plain text with line breaks
+  const getPlainTextWithLineBreaks = (html, maxLength = 50) => {
+    if (!html) return "";
+
+    // Create temporary div
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html;
+
+    // Get text content (this automatically converts <p> and <br> to line breaks)
+    let text = tempDiv.textContent || tempDiv.innerText || "";
+
+    // Clean up extra spaces and line breaks
+    text = text.replace(/\s+/g, " ").trim();
+
+    // Truncate
+    if (text.length > maxLength) {
+      text = text.substring(0, maxLength) + "...";
+    }
+
+    return text;
+  };
+
+  const getPlainText = (html, maxLength = 50) => {
+    if (!html) return "";
+
+    const div = document.createElement("div");
+    div.innerHTML = html;
+
+    let text = div.textContent || "";
+
+    if (text.length > maxLength) {
+      text = text.slice(0, maxLength) + "...";
+    }
+
+    return text;
+  };
+
   // Pagination
   const itemsPerPage = 10;
   const [currentPage, setCurrentPage] = useState(1);
@@ -40,14 +76,8 @@ const Hero = () => {
   }, [dispatch]);
 
   const { canRead, canWrite, canDelete, isFormDisabled } = useRoleRights(
-    PageNames.ADD_EVENT,
+    PageNames.HERO_SECTION,
   );
-
-  const stripHtmlTags = (html) => {
-    if (!html) return "";
-    const doc = new DOMParser().parseFromString(html, "text/html");
-    return doc.body.textContent || "";
-  };
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -160,6 +190,23 @@ const Hero = () => {
     }
     return pages;
   };
+
+  // Handle edit
+  const handleEdit = useCallback((item) => {
+    setForm({
+      _id: item._id,
+      title: item.title,
+      tag_line: item.tag_line,
+      description: item.description,
+      link: item.link,
+      alt_text: item.alt_text,
+      status: item.status,
+      image: null,
+      imagePreview: item.image,
+    });
+    setIsEdit(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
 
   return (
     <div>
@@ -281,7 +328,6 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
                 onChange={handleChange}
                 className="w-full border border-gray-300 rounded px-3 py-1 text-sm outline-none focus:ring-1 focus:ring-blue-500"
                 disabled={isFormDisabled}
-                required
               />
             </div>
             {/* STATUS */}
@@ -302,28 +348,30 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
             </div>
 
             <div className="md:col-span-3">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 py-2 px-3 bg-gray-50 border-b">
                 Description <span className="text-red-500">*</span>
               </label>
-              <Editor
+              <TiptapEditor
                 value={form.description}
-                name="description"
-                readOnly={isFormDisabled}
-                onTextChange={(e) => {
-                  setForm((prev) => ({ ...prev, description: e.htmlValue }));
-                }}
-                style={{
-                  height: "150px",
-                  borderRadius: "4px", // rounded
-                  borderBottom: "1px solid #e5e7eb", // border-gray-200
-                  overflow: "hidden", // corners properly clip ho
-                }}
-                className="w-full text-sm outline-none"
+                onChange={(html) =>
+                  setForm((prev) => ({ ...prev, description: html }))
+                }
+                isReadOnly={isFormDisabled}
               />
             </div>
 
             {/* ACTION BUTTONS */}
             <div className="md:col-span-3 flex justify-end gap-5 mt-6">
+              <button
+                type="button"
+                onClick={resetForm}
+                disabled={isSubmitting || isFormDisabled}
+                className={`px-5 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100 ${
+                  isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+              >
+                Cancel
+              </button>
               <button
                 type="submit"
                 disabled={isSubmitting || isFormDisabled}
@@ -338,17 +386,6 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
                   : isEdit
                     ? "Update"
                     : "Add"}{" "}
-              </button>
-
-              <button
-                type="button"
-                onClick={resetForm}
-                disabled={isSubmitting || isFormDisabled}
-                className={`px-5 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100 ${
-                  isSubmitting ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-              >
-                Cancel
               </button>
             </div>
           </form>
@@ -394,9 +431,8 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
                     <td className="px-4 py-3 text-blue-600 underline">
                       {item?.link}
                     </td>
-                    <td className="px-4 py-3 ">
-                      {stripHtmlTags(item?.description)?.slice(0, 50) + "..."}
-                    </td>
+                    {/* ✅ FIXED: Description cell with proper text */}
+                    {getPlainText(item?.description, 50)}
                     <td className="px-4 py-3">
                       <img
                         src={item?.image || "/placeholder.png"}
@@ -423,21 +459,7 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
                           {canWrite && (
                             <button
                               className="text-sm text-green-600 hover:underline"
-                              onClick={() => {
-                                setForm({
-                                  _id: item._id,
-                                  title: item.title,
-                                  tag_line: item.tag_line,
-                                  description: item.description,
-                                  link: item.link,
-                                  alt_text: item.alt_text,
-                                  status: item.status,
-                                  image: null,
-                                  imagePreview: item.image,
-                                });
-                                setIsEdit(true);
-                                window.scrollTo({ top: 0, behavior: "smooth" });
-                              }}
+                              onClick={() => handleEdit(item)}
                             >
                               Edit
                             </button>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Editor } from "primereact/editor";
+import TiptapEditor from "../../components/TiptapEditor";
 import { useDispatch, useSelector } from "react-redux";
 import {
   createInitiative,
@@ -34,6 +34,7 @@ const Initiatives = () => {
 
   const [isEdit, setIsEdit] = useState(false);
   const authUser = JSON.parse(localStorage.getItem("user"));
+
   // redux logic
   const { initiatives, loading } = useSelector((state) => state.initiative);
   const { data: allObjectiveCategories } = useSelector(
@@ -57,6 +58,18 @@ const Initiatives = () => {
   /* ===== PAGINATION STATE ===== */
   const itemsPerPage = 10;
   const [currentPage, setCurrentPage] = useState(1);
+
+  // utility to strip HTML and truncate for table display
+  const getPlainText = (html, maxLength = 50) => {
+    if (!html) return "";
+    const div = document.createElement("div");
+    div.innerHTML = html;
+    let text = div.textContent || "";
+    if (text.length > maxLength) {
+      text = text.slice(0, maxLength) + "...";
+    }
+    return text;
+  };
 
   /* ===== HANDLERS ===== */
   const handleChange = (e) => {
@@ -227,7 +240,9 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
 
           <form
             onSubmit={handleSubmit}
-            className={`grid grid-cols-1 md:grid-cols-4 gap-3 ${isFormDisabled ? "opacity-60 cursor-not-allowed" : ""}`}
+            className={`grid grid-cols-1 md:grid-cols-4 gap-3 ${
+              isFormDisabled ? "opacity-60 cursor-not-allowed" : ""
+            }`}
           >
             {/* TITLE */}
             <div>
@@ -293,15 +308,6 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
                 accept="image/*"
                 required={!isEdit}
               />
-              {/* {formData.imagePreview && (
-                <div className="mt-2">
-                  <img
-                    src={formData.imagePreview}
-                    alt="Preview"
-                    className="h-20 w-auto object-cover rounded border border-gray-300"
-                  />
-                </div>
-              )} */}
             </div>
             {/* IMAGE Alt Text*/}
             <div>
@@ -377,21 +383,12 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
                 Description
               </label>
 
-              <Editor
+              <TiptapEditor
                 value={formData.desc}
-                onTextChange={(e) => {
-                  if (e.source === "user") {
-                    setFormData((prev) => ({ ...prev, desc: e.htmlValue }));
-                  }
-                }}
-                style={{
-                  height: "120px",
-                  borderRadius: "4px", // rounded
-                  borderBottom: "1px solid #e5e7eb", // border-gray-200
-                  overflow: "hidden", // corners properly clip ho
-                }}
-                className="w-full text-sm outline-none"
-                readOnly={isFormDisabled}
+                onChange={(html) =>
+                  setFormData((prev) => ({ ...prev, desc: html }))
+                }
+                isReadOnly={isFormDisabled}
               />
             </div>
             {/* STATUS */}
@@ -433,13 +430,17 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
                   isEdit
                     ? "bg-blue-600 hover:bg-blue-700"
                     : "bg-green-600 hover:bg-green-700"
-                } ${isSubmitting || isFormDisabled ? "opacity-50 cursor-not-allowed" : ""}`}
+                } ${
+                  isSubmitting || isFormDisabled
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
+                }`}
               >
                 {isSubmitting
                   ? "Processing..."
                   : isEdit
                     ? "Update Initiatives"
-                    : "Add Initiatives"}{" "}
+                    : "Add Initiatives"}
               </button>
             </div>
           </form>
@@ -459,6 +460,7 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
                 <th className="px-4 py-3 font-medium">S.No</th>
                 <th className="px-4 py-3 font-medium">Initiatives Title</th>
                 <th className="px-4 py-3 font-medium">Link</th>
+                <th className="px-4 py-3 font-medium">Description</th>
                 <th className="px-4 py-3 font-medium">Image</th>
                 <th className="px-4 py-3 font-medium">Objective Category</th>
                 <th className="px-4 py-3 font-medium">Status</th>
@@ -471,7 +473,10 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
             <tbody>
               {loading && initiatives?.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="text-center py-4">
+                  <td
+                    colSpan={canWrite || canDelete ? 8 : 7}
+                    className="text-center py-4"
+                  >
                     Loading...
                   </td>
                 </tr>
@@ -486,6 +491,7 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
                     <td className="px-4 py-3 text-blue-600 underline">
                       {item.link}
                     </td>
+                    <td className="px-4 py-3">{getPlainText(item.desc, 50)}</td>
                     <td className="px-4 py-3">
                       <img
                         src={item.image || "/placeholder.png"}
@@ -496,12 +502,11 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
                     <td className="px-4 py-3">{item.objective_catagory}</td>
                     <td className="px-4 py-3">
                       <span
-                        className={`px-3 py-1 text-xs rounded-full font-medium
-          ${
-            item.status === "Active"
-              ? "bg-green-100 text-green-700"
-              : "bg-red-100 text-red-700"
-          }`}
+                        className={`px-3 py-1 text-xs rounded-full font-medium ${
+                          item.status === "Active"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
                       >
                         {item.status}
                       </span>

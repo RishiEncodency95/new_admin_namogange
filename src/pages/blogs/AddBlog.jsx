@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Editor } from "primereact/editor";
+import TiptapEditor from "../../components/TiptapEditor";
 import { createBlog, updateBlog } from "../../redux/slices/blog/blogSlice";
 import { showSuccess, showError } from "../../utils/toastService";
 import { getAllCategories } from "../../redux/slices/add_by_admin/categorySlice";
 import adminBanner from "../../assets/banners/bg.jpg";
 import useRoleRights from "../../hooks/useRoleRights";
 import { PageNames } from "../../utils/constants";
+import { motion } from "framer-motion";
 
 const AddBlog = () => {
   const dispatch = useDispatch();
@@ -71,12 +72,6 @@ const AddBlog = () => {
     }
   };
 
-  const handleEditorChange = (e) => {
-    if (e.source === "user") {
-      setFormData((prev) => ({ ...prev, content: e.htmlValue }));
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -135,7 +130,12 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
       >
         <div className="absolute inset-0 bg-white/10"></div>
         <div className="relative flex justify-center items-center px-6 py-4 h-25">
-          <div className="flex flex-col text-center">
+          <motion.div
+            className="flex flex-col text-center"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
             <h2 className="text-xl font-semibold text-gray-700 text-center">
               {isEdit ? "Update Blog" : "Add New Blog"}
             </h2>
@@ -144,13 +144,18 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
                 ? "Modify existing blog details."
                 : "Create a new blog post."}
             </p>
-          </div>
+          </motion.div>
         </div>
       </div>
 
       {/* Form */}
       <div className="space-y-3 p-5">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <motion.div
+          className="bg-white rounded-lg shadow-sm border border-gray-200 p-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
           <form
             onSubmit={handleSubmit}
             className={`grid grid-cols-1 gap-6 ${isFormDisabled ? "opacity-60 cursor-not-allowed" : ""}`}
@@ -228,7 +233,6 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
                   </div>
                 )} */}
               </div>
-              
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -296,12 +300,12 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Content <span className="text-red-500">*</span>
               </label>
-              <Editor
+              <TiptapEditor
                 value={formData.content}
-                onTextChange={handleEditorChange}
-                style={{ height: "160px" }}
-                className="w-full text-sm outline-none"
-                readOnly={isFormDisabled}
+                onChange={(html) =>
+                  setFormData((prev) => ({ ...prev, content: html }))
+                }
+                isReadOnly={isFormDisabled}
               />
             </div>
 
@@ -327,7 +331,7 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
               </button>
             </div>
           </form>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

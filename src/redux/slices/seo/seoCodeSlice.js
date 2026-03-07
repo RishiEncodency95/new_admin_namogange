@@ -4,14 +4,14 @@ import { createActivityLogThunk } from "../activityLog/activityLogSlice";
 
 /* ================= CREATE ================= */
 
-export const createSeo = createAsyncThunk(
-  "seo/create",
+export const createSeoCode = createAsyncThunk(
+  "seoCode/create",
   async (formData, { dispatch, rejectWithValue }) => {
     const token = localStorage.getItem("token");
     if (!token) return rejectWithValue("No token provided");
 
     try {
-      const res = await api.post("/seo/create", formData, {
+      const res = await api.post("/seo-code/create", formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -19,20 +19,16 @@ export const createSeo = createAsyncThunk(
         formData instanceof FormData
           ? formData.get("user_id")
           : formData?.user_id;
-      const pageName =
-        formData instanceof FormData
-          ? formData.get("page_name")
-          : formData?.page_name;
 
       dispatch(
         createActivityLogThunk({
           user_id: userId,
-          message: `SEO Created (${pageName})`,
-          link: `${import.meta.env.VITE_API_FRONT_URL}/seo`,
-          section: "SEO",
+          message: "SEO Code Created",
+          link: `${import.meta.env.VITE_API_FRONT_URL}/seo-code`,
+          section: "SEO Code",
           data: {
             action: "CREATE",
-            entity: "SEO",
+            entity: "SEO Code",
             new_data: res.data.data,
           },
         }),
@@ -47,14 +43,14 @@ export const createSeo = createAsyncThunk(
 
 /* ================= UPDATE ================= */
 
-export const updateSeo = createAsyncThunk(
-  "seo/update",
+export const updateSeoCode = createAsyncThunk(
+  "seoCode/update",
   async ({ id, formData }, { dispatch, rejectWithValue }) => {
     const token = localStorage.getItem("token");
     if (!token) return rejectWithValue("No token provided");
 
     try {
-      const res = await api.put(`/seo/${id}`, formData, {
+      const res = await api.put(`/seo-code/${id}`, formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -62,20 +58,16 @@ export const updateSeo = createAsyncThunk(
         formData instanceof FormData
           ? formData.get("user_id")
           : formData?.user_id;
-      const pageName =
-        formData instanceof FormData
-          ? formData.get("page_name")
-          : formData?.page_name;
 
       dispatch(
         createActivityLogThunk({
           user_id: userId,
-          message: `SEO Updated (${pageName})`,
-          link: `${import.meta.env.VITE_API_FRONT_URL}/seo`,
-          section: "SEO",
+          message: "SEO Code Updated",
+          link: `${import.meta.env.VITE_API_FRONT_URL}/seo-code`,
+          section: "SEO Code",
           data: {
             action: "UPDATE",
-            entity: "SEO",
+            entity: "SEO Code",
             new_data: res.data.data,
           },
         }),
@@ -90,11 +82,11 @@ export const updateSeo = createAsyncThunk(
 
 /* ================= GET ALL ================= */
 
-export const getAllSeo = createAsyncThunk(
-  "seo/getAll",
+export const getAllSeoCode = createAsyncThunk(
+  "seoCode/getAll",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await api.get("/seo");
+      const res = await api.get("/seo-code");
       return res.data.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -104,11 +96,11 @@ export const getAllSeo = createAsyncThunk(
 
 /* ================= GET BY ID ================= */
 
-export const getSeoById = createAsyncThunk(
-  "seo/getById",
+export const getSeoCodeById = createAsyncThunk(
+  "seoCode/getById",
   async (id, { rejectWithValue }) => {
     try {
-      const res = await api.get(`/seo/${id}`);
+      const res = await api.get(`/seo-code/${id}`);
       return res.data.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -118,15 +110,15 @@ export const getSeoById = createAsyncThunk(
 
 /* ================= DELETE ================= */
 
-export const deleteSeo = createAsyncThunk(
-  "seo/delete",
+export const deleteSeoCode = createAsyncThunk(
+  "seoCode/delete",
   async ({ id, user_id }, { dispatch, rejectWithValue }) => {
     const token = localStorage.getItem("token");
     if (!token) {
       return rejectWithValue("No token provided");
     }
     try {
-      await api.delete(`/seo/${id}`, {
+      await api.delete(`/seo-code/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -135,12 +127,12 @@ export const deleteSeo = createAsyncThunk(
       dispatch(
         createActivityLogThunk({
           user_id,
-          message: "SEO Deleted",
-          link: `${import.meta.env.VITE_API_FRONT_URL}/seo`,
-          section: "SEO",
+          message: "SEO Code Deleted",
+          link: `${import.meta.env.VITE_API_FRONT_URL}/seo-code`,
+          section: "SEO Code",
           data: {
             action: "DELETE",
-            entity: "SEO",
+            entity: "SEO Code",
             new_data: id,
           },
         }),
@@ -155,92 +147,92 @@ export const deleteSeo = createAsyncThunk(
 
 /* ================= SLICE ================= */
 
-const seoSlice = createSlice({
-  name: "seo",
+const seoCodeSlice = createSlice({
+  name: "seoCode",
   initialState: {
-    seoList: [],
-    singleSeo: null,
+    seoCodeList: [],
+    singleSeoCode: null,
     loading: false,
     error: null,
   },
   reducers: {
-    clearSingleSeo: (state) => {
-      state.singleSeo = null;
+    clearSingleSeoCode: (state) => {
+      state.singleSeoCode = null;
     },
   },
   extraReducers: (builder) => {
     builder
 
       // CREATE
-      .addCase(createSeo.pending, (state) => {
+      .addCase(createSeoCode.pending, (state) => {
         state.loading = true;
       })
-      .addCase(createSeo.fulfilled, (state, action) => {
+      .addCase(createSeoCode.fulfilled, (state, action) => {
         state.loading = false;
-        state.seoList.unshift(action.payload);
+        state.seoCodeList.unshift(action.payload);
       })
-      .addCase(createSeo.rejected, (state, action) => {
+      .addCase(createSeoCode.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
 
       // GET ALL
-      .addCase(getAllSeo.pending, (state) => {
+      .addCase(getAllSeoCode.pending, (state) => {
         state.loading = true;
       })
-      .addCase(getAllSeo.fulfilled, (state, action) => {
+      .addCase(getAllSeoCode.fulfilled, (state, action) => {
         state.loading = false;
-        state.seoList = action.payload;
+        state.seoCodeList = action.payload;
       })
-      .addCase(getAllSeo.rejected, (state, action) => {
+      .addCase(getAllSeoCode.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
 
       // GET BY ID
-      .addCase(getSeoById.fulfilled, (state, action) => {
-        state.singleSeo = action.payload;
+      .addCase(getSeoCodeById.fulfilled, (state, action) => {
+        state.singleSeoCode = action.payload;
       })
 
       // UPDATE
-      .addCase(updateSeo.pending, (state) => {
+      .addCase(updateSeoCode.pending, (state) => {
         state.loading = true;
       })
-      .addCase(updateSeo.fulfilled, (state, action) => {
+      .addCase(updateSeoCode.fulfilled, (state, action) => {
         state.loading = false;
 
-        const index = state.seoList.findIndex(
+        const index = state.seoCodeList.findIndex(
           (item) => item._id === action.payload._id,
         );
 
         if (index !== -1) {
-          state.seoList[index] = action.payload;
+          state.seoCodeList[index] = action.payload;
         }
 
-        state.singleSeo = action.payload;
+        state.singleSeoCode = action.payload;
       })
-      .addCase(updateSeo.rejected, (state, action) => {
+      .addCase(updateSeoCode.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
 
       // DELETE
-      .addCase(deleteSeo.pending, (state) => {
+      .addCase(deleteSeoCode.pending, (state) => {
         state.loading = true;
       })
-      .addCase(deleteSeo.fulfilled, (state, action) => {
+      .addCase(deleteSeoCode.fulfilled, (state, action) => {
         state.loading = false;
-        state.seoList = state.seoList.filter(
+        state.seoCodeList = state.seoCodeList.filter(
           (item) => item._id !== action.payload,
         );
       })
-      .addCase(deleteSeo.rejected, (state, action) => {
+      .addCase(deleteSeoCode.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
   },
 });
 
-export const { clearSingleSeo } = seoSlice.actions;
+export const { clearSingleSeoCode } = seoCodeSlice.actions;
 
-export default seoSlice.reducer;
+export default seoCodeSlice.reducer;

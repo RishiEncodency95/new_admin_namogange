@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Editor } from "primereact/editor";
+import TiptapEditor from "../../components/TiptapEditor";
 import { useDispatch, useSelector } from "react-redux";
 import { showSuccess, showError } from "../../utils/toastService";
 import {
@@ -8,7 +8,6 @@ import {
   updateEvent,
   deleteEvent,
 } from "../../redux/slices/add_by_admin/eventSlice";
-import adminBanner from "../../assets/banners/bg.jpg";
 import useRoleRights from "../../hooks/useRoleRights";
 import { PageNames } from "../../utils/constants";
 
@@ -398,20 +397,12 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
                 Description <span className="text-red-500">*</span>
               </label>
 
-              <Editor
+              <TiptapEditor
                 value={form.description}
-                name="description"
-                readOnly={isFormDisabled}
-                onTextChange={(e) =>
-                  setForm({ ...form, description: e.htmlValue })
+                onChange={(html) =>
+                  setForm((prev) => ({ ...prev, description: html }))
                 }
-                style={{
-                  height: "150px",
-                  borderRadius: "4px", // rounded
-                  borderBottom: "1px solid #e5e7eb", // border-gray-200
-                  overflow: "hidden", // corners properly clip ho
-                }}
-                className="w-full text-sm outline-none"
+                isReadOnly={isFormDisabled}
               />
             </div>
 

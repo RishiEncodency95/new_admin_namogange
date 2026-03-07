@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Editor } from "primereact/editor";
+import TiptapEditor from "../../components/TiptapEditor";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import adminBanner from "../../assets/banners/bg.jpg";
@@ -269,20 +269,12 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
                 Description
               </label>
 
-              <Editor
+              <TiptapEditor
                 value={formData.description}
-                name="description"
-                onTextChange={(e) =>
-                  setFormData({ ...formData, description: e.htmlValue })
+                onChange={(html) =>
+                  setFormData((prev) => ({ ...prev, description: html }))
                 }
-                style={{
-                  height: "150px",
-                  borderRadius: "4px", // rounded
-                  borderBottom: "1px solid #e5e7eb", // border-gray-200
-                  overflow: "hidden", // corners properly clip ho
-                }}
-                className="w-full text-sm outline-none"
-                readOnly={isFormDisabled}
+                isReadOnly={isFormDisabled}
               />
             </div>
             {/* ACTION BUTTONS */}

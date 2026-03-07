@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Editor } from "primereact/editor";
+import TiptapEditor from "../../components/TiptapEditor";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchAbouts,
@@ -9,6 +9,7 @@ import {
 } from "../../redux/slices/about_us/aboutSlice";
 import { showSuccess, showError } from "../../utils/toastService";
 import useRoleRights from "../../hooks/useRoleRights";
+import { PageNames } from "../../utils/constants";
 
 const About = () => {
   const dispatch = useDispatch();
@@ -35,8 +36,9 @@ const About = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   // Role Rights - Using "About" as the page name, adjust if you have a constant for it
-  const { canRead, canWrite, canDelete, isFormDisabled } =
-    useRoleRights("About Section");
+  const { canRead, canWrite, canDelete, isFormDisabled } = useRoleRights(
+    PageNames.ABOUT_US,
+  );
 
   useEffect(() => {
     dispatch(fetchAbouts());
@@ -87,7 +89,7 @@ const About = () => {
       showError("Title is required.");
       return;
     }
-    if (!form.desc || form.desc === "<p><br></p>") {
+    if (!form.desc || form.desc === "<p><br></p>" || form.desc === "<p></p>") {
       showError("Description is required.");
       return;
     }
@@ -137,10 +139,19 @@ const About = () => {
     }
   };
 
-  const stripHtmlTags = (html) => {
+  const getPlainText = (html, maxLength = 50) => {
     if (!html) return "";
-    const doc = new DOMParser().parseFromString(html, "text/html");
-    return doc.body.textContent || "";
+
+    const div = document.createElement("div");
+    div.innerHTML = html;
+
+    let text = div.textContent || "";
+
+    if (text.length > maxLength) {
+      text = text.slice(0, maxLength) + "...";
+    }
+
+    return text;
   };
 
   /* ===== PAGINATION LOGIC ===== */
@@ -297,26 +308,27 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Description <span className="text-red-500">*</span>
               </label>
-              <Editor
-                key={form._id || "new-about"}
+              <TiptapEditor
                 value={form.desc}
-                name="desc"
-                readOnly={isFormDisabled}
-                onTextChange={(e) => {
-                  setForm((prev) => ({ ...prev, desc: e.htmlValue }));
-                }}
-                style={{
-                  height: "150px",
-                  borderRadius: "4px",
-                  borderBottom: "1px solid #e5e7eb",
-                  overflow: "hidden",
-                }}
-                className="w-full text-sm outline-none"
+                onChange={(html) =>
+                  setForm((prev) => ({ ...prev, desc: html }))
+                }
+                isReadOnly={isFormDisabled}
               />
             </div>
 
             {/* ACTION BUTTONS */}
             <div className="md:col-span-3 flex justify-end gap-5 mt-6">
+              <button
+                type="button"
+                onClick={resetForm}
+                disabled={isSubmitting || isFormDisabled}
+                className={`px-5 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100 ${
+                  isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+              >
+                Cancel
+              </button>
               <button
                 type="submit"
                 disabled={isSubmitting || isFormDisabled}
@@ -331,17 +343,6 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
                   : isEdit
                     ? "Update"
                     : "Add"}{" "}
-              </button>
-
-              <button
-                type="button"
-                onClick={resetForm}
-                disabled={isSubmitting || isFormDisabled}
-                className={`px-5 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100 ${
-                  isSubmitting ? "opacity-50 cursor-not-allowed" : ""
-                }`}
-              >
-                Cancel
               </button>
             </div>
           </form>
@@ -388,9 +389,7 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
                         className="h-10 w-14 object-cover rounded border border-gray-300"
                       />
                     </td>
-                    <td className="px-4 py-3">
-                      {stripHtmlTags(item.desc)?.slice(0, 50) + "..."}
-                    </td>
+                    <td className="px-4 py-3">{getPlainText(item.desc, 50)}</td>
                     <td className="px-4 py-3">
                       <span
                         className={`px-3 py-1 text-xs rounded-full font-medium ${

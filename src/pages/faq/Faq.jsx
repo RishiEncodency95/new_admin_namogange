@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Editor } from "primereact/editor";
+import TiptapEditor from "../../components/TiptapEditor";
 import { useDispatch, useSelector } from "react-redux";
 import {
   createFaq,
@@ -37,12 +37,6 @@ const Faq = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-  };
-
-  const handleEditorChange = (e) => {
-    if (e.source === "user") {
-      setFormData((prev) => ({ ...prev, answer: e.htmlValue }));
-    }
   };
 
   const resetForm = () => {
@@ -183,12 +177,12 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Answer
               </label>
-              <Editor
+              <TiptapEditor
                 value={formData.answer}
-                onTextChange={handleEditorChange}
-                style={{ height: "180px" }}
-                className="w-full text-sm outline-none"
-                readOnly={isFormDisabled}
+                onChange={(html) =>
+                  setFormData((prev) => ({ ...prev, answer: html }))
+                }
+                isReadOnly={isFormDisabled}
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

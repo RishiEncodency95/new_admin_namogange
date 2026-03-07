@@ -1,6 +1,8 @@
 export const PageNames = {
   DASHBOARD: "Dashboard",
   HOME_BANNER: "Home Banner",
+  HERO_SECTION: "Hero Section",
+  ABOUT_US: "About Us",
   OBJECTIVE: "Objective",
   TESTIMONIAL: "Testimonial",
   INITIATIVES: "Initiatives",
@@ -51,7 +53,7 @@ export const PageNames = {
   ADD_DEPARTMENT: "Add Department",
   ADD_CATEGORY: "Add Category",
   ADD_PROFESSION: "Add Profession",
-  ADD_EVENT: "Add Event",
+  ADD_EVENT: "Event",
   ADD_STATUS: "Add Status",
   ADD_UNIVERSITY: "Add University",
   ADD_SOURCE: "Add Source",

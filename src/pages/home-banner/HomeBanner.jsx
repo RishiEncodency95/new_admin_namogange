@@ -7,7 +7,6 @@ import {
   deleteBanner,
 } from "../../redux/slices/home-banner/bannerSlice";
 import { showSuccess, showError } from "../../utils/toastService";
-import adminBanner from "../../assets/banners/bg.jpg";
 import { MdSchedule } from "react-icons/md";
 import useRoleRights from "../../hooks/useRoleRights";
 import { PageNames } from "../../utils/constants";
