@@ -93,6 +93,7 @@ import Notification from "./pages/notification/Notification";
 import Hero from "./pages/hero/Hero";
 import About from "./pages/about_us/About";
 import AddSEOCode from "./pages/seo/AddSEOCode";
+import SocialMedia from "./pages/seo/SocialMedia";
 
 function App() {
   return (
@@ -282,6 +283,7 @@ function App() {
             <Route path="/seo/add-seo" element={<AddSEO />} />
             <Route path="/seo/seo-list" element={<SEOList />} />
             <Route path="/seo/add-seo-code" element={<AddSEOCode />} />
+            <Route path="/seo/social-media" element={<SocialMedia />} />
           </Route>
         </Route>
       </Routes>

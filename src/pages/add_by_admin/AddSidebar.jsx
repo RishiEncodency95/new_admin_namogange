@@ -165,12 +165,11 @@ const AddSidebar = () => {
 
   const handleDelete = (id) => {
     const currentUserId = authUser?.id || null;
-    if (window.confirm("Are you sure you want to delete this item?")) {
-      dispatch(deleteSidebar({ id, user_id: currentUserId })).then(() => {
-        showSuccess("Sidebar item deleted successfully");
-        dispatch(getAllSidebars());
-      });
-    }
+
+    dispatch(deleteSidebar({ id, user_id: currentUserId })).then(() => {
+      showSuccess("Sidebar item deleted successfully");
+      dispatch(getAllSidebars());
+    });
   };
   /* ===== PAGINATION LOGIC ===== */
   const totalPages = Math.ceil((filteredData?.length || 0) / itemsPerPage);
