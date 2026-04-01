@@ -95,7 +95,6 @@ import About from "./pages/about_us/About";
 import AddSEOCode from "./pages/seo/AddSEOCode";
 import SocialMedia from "./pages/seo/SocialMedia";
 import Job from "./pages/job/Job";
-import ClickAnalytics from "./pages/clickAnalytics/ClickAnalytics";
 import ApplyJob from "./pages/job/ApplyJob";
 import ClickAnalytics from "./pages/click-analytics/ClickAnalytics";
 
