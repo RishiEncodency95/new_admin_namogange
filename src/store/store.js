@@ -51,6 +51,9 @@ import heroReducer from "../redux/slices/hero/heroSlice";
 import aboutReducer from "../redux/slices/about_us/aboutSlice";
 import seoCodeReducer from "../redux/slices/seo/seoCodeSlice";
 import socialMediaReducer from "../redux/slices/seo/socialMediaSlice";
+import jobReducer from "../redux/slices/job/jobSlice";
+import jobApplyReducer from "../redux/slices/job/jobApplySlice";  
+
 
 const store = configureStore({
   reducer: {
@@ -106,6 +109,8 @@ const store = configureStore({
     about: aboutReducer,
     seoCode: seoCodeReducer,
     socialMedia: socialMediaReducer,
+    job: jobReducer,
+    jobApply: jobApplyReducer,
   },
 });
 

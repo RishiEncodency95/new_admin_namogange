@@ -71,4 +71,6 @@ export const PageNames = {
   ADD_COLLEGE: "Add College",
   COLLEGE_LIST: "College List",
   ROLE_RIGHTS: "Role Rights",
+  JOB: "Add Job",
+  APPLY_JOB: "Apply Job",
 };

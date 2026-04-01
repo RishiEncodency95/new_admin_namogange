@@ -64,6 +64,8 @@ const SECTIONS = [
   "SEO MANAGEMENT",
   "ADMIN MANAGEMENT",
   "CONTENT SECTION",
+  "CLICK ANALYTICS",
+  "CAREER SECTION",
 ];
 
 const AddSidebar = () => {
