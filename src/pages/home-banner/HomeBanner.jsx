@@ -93,7 +93,7 @@ const HomeBanner = () => {
 
       if (file.size > maxSize) {
         showError("Image size must be less than 10MB");
-        setError("Image must be less than 100KB");
+        setError("Image must be less than 10MB");
         e.target.value = "";
         setFormData({ ...formData, image: null, imagePreview: "" });
         return;
@@ -385,9 +385,8 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
                 type="button"
                 onClick={() => setShowScheduleModal(true)}
                 disabled={isSubmitting || isFormDisabled}
-                className={`px-5 py-1 text-sm text-white border border-gray-300 rounded bg-blue-500 hover:bg-blue-600 ${
-                  isSubmitting ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+                className={`px-5 py-1 text-sm text-white border border-gray-300 rounded bg-blue-500 hover:bg-blue-600 ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
               >
                 Schedule
               </button>
@@ -395,11 +394,10 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
               <button
                 type="submit"
                 disabled={isSubmitting || isFormDisabled}
-                className={`px-6 py-1 text-sm rounded text-white ${
-                  isEdit
+                className={`px-6 py-1 text-sm rounded text-white ${isEdit
                     ? "bg-blue-600 hover:bg-blue-700"
                     : "bg-green-600 hover:bg-green-700"
-                } ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
+                  } ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
               >
                 {isSubmitting
                   ? "Processing..."
@@ -413,9 +411,8 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
                 type="button"
                 onClick={resetForm}
                 disabled={isSubmitting || isFormDisabled}
-                className={`px-5 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100 ${
-                  isSubmitting ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+                className={`px-5 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100 ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
               >
                 Cancel
               </button>
@@ -475,11 +472,10 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
                     <td className="px-4 py-3">
                       <span
                         className={`px-3 py-1 text-xs rounded-full font-medium
-          ${
-            item.status === "Active"
-              ? "bg-green-100 text-green-700"
-              : "bg-red-100 text-red-700"
-          }`}
+          ${item.status === "Active"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700"
+                          }`}
                       >
                         {item?.status}
                       </span>
@@ -577,11 +573,10 @@ hover:after:w-full"
                   <button
                     key={p}
                     onClick={() => setCurrentPage(p)}
-                    className={`px-3 h-8 border border-gray-300 hover:bg-gray-50 ${
-                      currentPage === p
+                    className={`px-3 h-8 border border-gray-300 hover:bg-gray-50 ${currentPage === p
                         ? "bg-blue-50 text-blue-600 font-semibold"
                         : ""
-                    }`}
+                      }`}
                   >
                     {p}
                   </button>

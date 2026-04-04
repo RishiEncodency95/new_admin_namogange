@@ -41,7 +41,9 @@ const SocialMedia = () => {
     whatsappNumber: "",
     whatsappMessage: "",
     callNumber: "",
+    callNumber2: "",
     mail: "",
+    mail2: "",
     address: "",
     status: "Active",
   });
@@ -67,7 +69,9 @@ const SocialMedia = () => {
         whatsappNumber: data.whatsappNumber || "",
         whatsappMessage: data.whatsappMessage || "",
         callNumber: data.callNumber || "",
+        callNumber2: data.callNumber2 || "",
         mail: data.mail || "",
+        mail2: data.mail2 || "",
         address: data.address || "",
         status: data.status || "Active",
       });
@@ -94,7 +98,9 @@ const SocialMedia = () => {
       whatsappNumber: "",
       whatsappMessage: "",
       callNumber: "",
+      callNumber2: "",
       mail: "",
+      mail2: "",
       address: "",
       status: "Active",
     });
@@ -112,7 +118,9 @@ const SocialMedia = () => {
       whatsappNumber: item.whatsappNumber || "",
       whatsappMessage: item.whatsappMessage || "",
       callNumber: item.callNumber || "",
+      callNumber2: item.callNumber2 || "",
       mail: item.mail || "",
+      mail2: item.mail2 || "",
       address: item.address || "",
       status: item.status || "Active",
     });
@@ -222,6 +230,21 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
               />
             </div>
 
+            {/* CALL NUMBER 2 */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                <Phone size={14} className="text-blue-600" /> Call Number 2 (Optional)
+              </label>
+              <input
+                type="text"
+                name="callNumber2"
+                value={formData.callNumber2}
+                onChange={handleChange}
+                placeholder="+919876543210"
+                className="w-full border border-gray-300 rounded px-3 py-1 text-sm outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
+
             {/* WHATSAPP MESSAGE */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -312,6 +335,21 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
               />
             </div>
 
+            {/* MAIL ID 2 */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                <Mail size={14} className="text-[#FF0000]" /> Mail ID 2 (Optional)
+              </label>
+              <input
+                type="email"
+                name="mail2"
+                value={formData.mail2}
+                onChange={handleChange}
+                placeholder="optional@example.com"
+                className="w-full border border-gray-300 rounded px-3 py-1 text-sm outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
+
             {/* Address  */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
@@ -363,11 +401,10 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
               <button
                 type="submit"
                 disabled={loading}
-                className={`px-6 py-1 text-sm rounded text-white ${
-                  isEdit
+                className={`px-6 py-1 text-sm rounded text-white ${isEdit
                     ? "bg-blue-600 hover:bg-blue-700"
                     : "bg-green-600 hover:bg-green-700"
-                } flex items-center gap-2`}
+                  } flex items-center gap-2`}
               >
                 {loading ? (
                   <Loader2 size={14} className="animate-spin" />
@@ -408,7 +445,7 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
             </thead>
             <tbody>
               {!socialData ||
-              (Array.isArray(socialData) && socialData.length === 0) ? (
+                (Array.isArray(socialData) && socialData.length === 0) ? (
                 <tr>
                   <td colSpan="6" className="text-center py-4 text-gray-400">
                     No configuration saved yet.
@@ -441,11 +478,10 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
                       </td>
                       <td className="px-4 py-3">
                         <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                            item.status === "Active"
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${item.status === "Active"
                               ? "bg-green-100 text-green-700"
                               : "bg-red-100 text-red-700"
-                          }`}
+                            }`}
                         >
                           {item.status}
                         </span>

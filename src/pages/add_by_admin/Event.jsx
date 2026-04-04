@@ -261,14 +261,14 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Reporting Point
+                Location
               </label>
               <input
                 name="reporting_point"
                 value={form.reporting_point}
                 onChange={handleChange}
                 type="text"
-                placeholder="Reporting Point"
+                placeholder="Location"
                 className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm outline-none focus:ring-1 focus:ring-blue-500"
                 disabled={isFormDisabled}
               />
