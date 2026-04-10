@@ -23,7 +23,10 @@ const Initiatives = () => {
     image: null,
     imagePreview: "",
     image_alt: "",
+    pages_images: [],
+    pagesImagesPreviews: [], // [{ url, alt, isNew }]
     desc: "",
+    page_description: "",
     created_by: "",
     updated_by: "",
     objectiveCategory: "",
@@ -76,10 +79,9 @@ const Initiatives = () => {
     if (name === "image" && files?.[0]) {
       const file = files[0];
       const maxSize = 10 * 1024 * 1024; // 10MB
-
       if (file.size > maxSize) {
         showError("Image size must be less than 10MB");
-        e.target.value = ""; // Clear the input
+        e.target.value = "";
         setFormData((prev) => ({ ...prev, image: null, imagePreview: "" }));
         return;
       }
@@ -87,6 +89,31 @@ const Initiatives = () => {
         ...prev,
         image: files[0],
         imagePreview: URL.createObjectURL(files[0]),
+      }));
+    } else if (name === "pages_images" && files) {
+      const selectedFiles = Array.from(files);
+      const maxSize = 10 * 1024 * 1024;
+      const currentCount = formData.pagesImagesPreviews.length;
+      if (currentCount + selectedFiles.length > 4) {
+        showError("You can only upload a maximum of 4 page images.");
+        return;
+      }
+      const validFiles = [];
+      const newPreviews = [];
+      selectedFiles.forEach((file) => {
+        if (file.size <= maxSize) {
+          validFiles.push(file);
+          newPreviews.push({
+            url: URL.createObjectURL(file),
+            alt: formData.image_alt || "",
+            isNew: true,
+          });
+        }
+      });
+      setFormData((prev) => ({
+        ...prev,
+        pages_images: [...prev.pages_images, ...validFiles],
+        pagesImagesPreviews: [...prev.pagesImagesPreviews, ...newPreviews],
       }));
     } else if (name === "title") {
       const slug = value
@@ -101,6 +128,23 @@ const Initiatives = () => {
     }
   };
 
+  const handleUpdatePageImageAlt = (index, newAlt) => {
+    const updated = [...formData.pagesImagesPreviews];
+    updated[index] = { ...updated[index], alt: newAlt };
+    setFormData((prev) => ({ ...prev, pagesImagesPreviews: updated }));
+  };
+
+  const handleRemovePageImage = (index) => {
+    const imageToRemove = formData.pagesImagesPreviews[index];
+    const updatedPreviews = formData.pagesImagesPreviews.filter((_, i) => i !== index);
+    let updatedFiles = [...formData.pages_images];
+    if (imageToRemove.isNew) {
+      const newFilesIndex = formData.pagesImagesPreviews.slice(0, index).filter(p => p.isNew).length;
+      updatedFiles = formData.pages_images.filter((_, i) => i !== newFilesIndex);
+    }
+    setFormData((prev) => ({ ...prev, pagesImagesPreviews: updatedPreviews, pages_images: updatedFiles }));
+  };
+
   const resetForm = () => {
     setFormData({
       _id: null,
@@ -110,8 +154,10 @@ const Initiatives = () => {
       image: null,
       imagePreview: "", // Clear image preview
       image_alt: "",
-
+      pages_images: [],
+      pagesImagesPreviews: [],
       desc: "",
+      page_description: "",
       created_by: "",
       updated_by: "",
       objectiveCategory: "",
@@ -156,13 +202,27 @@ const Initiatives = () => {
     dataToSend.append("link", formData.link);
     dataToSend.append("image_alt", formData.image_alt);
     dataToSend.append("status", formData.status);
-
     dataToSend.append("desc", formData.desc);
+    dataToSend.append("page_description", formData.page_description);
     dataToSend.append("objective_catagory", formData.objectiveCategory);
-    console.log("formData", formData);
 
     if (formData.image instanceof File) {
       dataToSend.append("image", formData.image);
+    }
+
+    // Supplemental Images
+    const newSupplementalAlts = [];
+    formData.pagesImagesPreviews.forEach((preview) => {
+      if (preview.isNew) {
+        newSupplementalAlts.push(preview.alt);
+      }
+    });
+    dataToSend.append("new_pages_images_alts", JSON.stringify(newSupplementalAlts));
+
+    if (formData.pages_images && formData.pages_images.length > 0) {
+      formData.pages_images.forEach((file) => {
+        dataToSend.append("pages_images", file);
+      });
     }
 
     const currentUserId = authUser?.id || null;
@@ -170,6 +230,12 @@ const Initiatives = () => {
 
     try {
       if (isEdit) {
+        // Handle existing images for update
+        const existingToKeep = formData.pagesImagesPreviews
+          .filter((p) => !p.isNew)
+          .map((p) => ({ url: p.url, alt: p.alt }));
+        dataToSend.append("existing_pages_images", JSON.stringify(existingToKeep));
+
         dataToSend.append("updated_by", currentUserName);
         dataToSend.append("user_id", currentUserId);
         await dispatch(
@@ -177,6 +243,8 @@ const Initiatives = () => {
         ).unwrap();
         showSuccess("Initiative updated successfully");
       } else {
+        // Initial creation alts
+        dataToSend.append("pages_images_alts", JSON.stringify(newSupplementalAlts));
         dataToSend.append("created_by", currentUserName);
         dataToSend.append("updated_by", currentUserName);
         dataToSend.append("user_id", currentUserId);
@@ -249,9 +317,8 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
 
           <form
             onSubmit={handleSubmit}
-            className={`grid grid-cols-1 md:grid-cols-4 gap-3 ${
-              isFormDisabled ? "opacity-60 cursor-not-allowed" : ""
-            }`}
+            className={`grid grid-cols-1 md:grid-cols-4 gap-3 ${isFormDisabled ? "opacity-60 cursor-not-allowed" : ""
+              }`}
           >
             {/* TITLE */}
             <div>
@@ -288,7 +355,7 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
             {/* LINK */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Link <span className="text-red-500">*</span>
+                Link
               </label>
               <input
                 type="text"
@@ -297,7 +364,6 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
                 onChange={handleChange}
                 placeholder="Enter link"
                 className="w-full border border-gray-300 rounded px-3 py-1 text-sm outline-none focus:ring-1 focus:ring-blue-500"
-                required
                 disabled={isFormDisabled}
               />
             </div>
@@ -363,17 +429,74 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
                 ))}
               </select>
             </div>
+            {/* Bulk Images */}
+            <div className="md:col-span-4 mt-4">
+              <label className="block text-sm font-bold text-gray-700 uppercase tracking-tight mb-2 ml-1">
+                Page Images (Max 4 Images)
+              </label>
+              <div className="p-4 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50 hover:bg-blue-50/30 transition-colors duration-300">
+                <input
+                  type="file"
+                  name="pages_images"
+                  multiple
+                  onChange={handleChange}
+                  disabled={isFormDisabled || formData.pagesImagesPreviews.length >= 4}
+                  className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer disabled:opacity-50"
+                  accept="image/*"
+                />
+              </div>
 
+              {formData.pagesImagesPreviews.length > 0 && (
+                <div className="mt-6 p-6 bg-white rounded-2xl border border-gray-100 shadow-xl overflow-x-auto custom-scrollbar">
+                  <div className="flex gap-6 pb-2 min-w-max">
+                    {formData.pagesImagesPreviews.map((p, i) => (
+                      <div key={i} className="group relative flex flex-col gap-3 animate-fadeIn w-40 shrink-0">
+                        <div className="relative aspect-square rounded-xl overflow-hidden border-2 border-gray-100 shadow-md transform transition-transform duration-300 group-hover:scale-[1.02]">
+                          <img src={p.url} className="w-full h-full object-cover" alt="preview" />
+                          <button
+                            type="button"
+                            onClick={() => handleRemovePageImage(i)}
+                            className="absolute inset-0 bg-red-600/80 text-white text-[10px] font-black opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all duration-300 backdrop-blur-[2px]"
+                          >
+                            REMOVE PHOTO
+                          </button>
+                        </div>
+                        <input
+                          type="text"
+                          value={p.alt}
+                          onChange={(e) => handleUpdatePageImageAlt(i, e.target.value)}
+                          placeholder="Add Alt Text..."
+                          className="w-full text-xs border border-gray-200 rounded-lg py-2 px-3 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all placeholder:text-gray-300 shadow-sm"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
             {/* Desc  */}
             <div className="md:col-span-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Description
+                Short Description
               </label>
-
               <TiptapEditor
                 value={formData.desc}
                 onChange={(html) =>
                   setFormData((prev) => ({ ...prev, desc: html }))
+                }
+                isReadOnly={isFormDisabled}
+              />
+            </div>
+
+            {/* Page Description  */}
+            <div className="md:col-span-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Full Page Detailed Description
+              </label>
+              <TiptapEditor
+                value={formData.page_description}
+                onChange={(html) =>
+                  setFormData((prev) => ({ ...prev, page_description: html }))
                 }
                 isReadOnly={isFormDisabled}
               />
@@ -401,11 +524,10 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
                 type="button"
                 onClick={handleCancel}
                 disabled={isSubmitting || isFormDisabled}
-                className={`px-5 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100 ${
-                  isSubmitting || isFormDisabled
-                    ? "opacity-50 cursor-not-allowed"
-                    : ""
-                }`}
+                className={`px-5 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100 ${isSubmitting || isFormDisabled
+                  ? "opacity-50 cursor-not-allowed"
+                  : ""
+                  }`}
               >
                 Cancel
               </button>
@@ -413,15 +535,13 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
               <button
                 type="submit"
                 disabled={isSubmitting || isFormDisabled}
-                className={`px-6 py-1 text-sm rounded text-white ${
-                  isEdit
-                    ? "bg-blue-600 hover:bg-blue-700"
-                    : "bg-green-600 hover:bg-green-700"
-                } ${
-                  isSubmitting || isFormDisabled
+                className={`px-6 py-1 text-sm rounded text-white ${isEdit
+                  ? "bg-blue-600 hover:bg-blue-700"
+                  : "bg-green-600 hover:bg-green-700"
+                  } ${isSubmitting || isFormDisabled
                     ? "opacity-50 cursor-not-allowed"
                     : ""
-                }`}
+                  }`}
               >
                 {isSubmitting
                   ? "Processing..."
@@ -489,11 +609,10 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
                     <td className="px-4 py-3">{item.objective_catagory}</td>
                     <td className="px-4 py-3">
                       <span
-                        className={`px-3 py-1 text-xs rounded-full font-medium ${
-                          item.status === "Active"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-red-100 text-red-700"
-                        }`}
+                        className={`px-3 py-1 text-xs rounded-full font-medium ${item.status === "Active"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                          }`}
                       >
                         {item.status}
                       </span>
@@ -519,6 +638,13 @@ hover:after:w-full"
                                   image_alt: item.image_alt,
 
                                   desc: item.desc,
+                                  page_description: item.page_description || "",
+                                  pages_images: [],
+                                  pagesImagesPreviews: (item.pages_images || []).map((img) => ({
+                                    url: img.url,
+                                    alt: img.alt,
+                                    isNew: false,
+                                  })),
                                   objectiveCategory: item.objective_catagory,
                                   status: item.status,
                                 });
@@ -577,11 +703,10 @@ hover:after:w-full"
                   <button
                     key={p}
                     onClick={() => setCurrentPage(p)}
-                    className={`px-3 h-8 border border-gray-300 hover:bg-gray-50 ${
-                      currentPage === p
-                        ? "bg-blue-50 text-blue-600 font-semibold"
-                        : ""
-                    }`}
+                    className={`px-3 h-8 border border-gray-300 hover:bg-gray-50 ${currentPage === p
+                      ? "bg-blue-50 text-blue-600 font-semibold"
+                      : ""
+                      }`}
                   >
                     {p}
                   </button>
