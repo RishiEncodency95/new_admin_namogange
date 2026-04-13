@@ -89,10 +89,10 @@ const PhotosGallery = () => {
       selectedFiles.forEach((file) => {
         if (file.size <= maxSize) {
           validFiles.push(file);
-          newPreviews.push({ 
-            url: URL.createObjectURL(file), 
-            alt: formData.image_alt, 
-            isNew: true 
+          newPreviews.push({
+            url: URL.createObjectURL(file),
+            alt: formData.image_alt,
+            isNew: true
           });
         }
       });
@@ -153,10 +153,10 @@ const PhotosGallery = () => {
         const existingToKeep = formData.imagePreviews
           .filter(p => !p.isNew)
           .map(p => ({ url: p.url, alt: p.alt }));
-        
+
         dataToSend.append("existing_images", JSON.stringify(existingToKeep));
         formData.images.forEach(f => dataToSend.append("images", f));
-        
+
         await dispatch(updateGallery({ id: formData._id, formData: dataToSend })).unwrap();
         showSuccess("Photo Gallery updated successfully");
       } else {
@@ -258,8 +258,8 @@ const PhotosGallery = () => {
               {isEdit ? "Update Photo Gallery" : "Add Photo Gallery"}
             </h3>
             {isEdit && (
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={applyCommonAltToAll}
                 className="text-xs text-blue-600 font-medium hover:underline"
               >
@@ -304,9 +304,9 @@ const PhotosGallery = () => {
                       <img src={p.url} className="w-full h-full object-cover" alt="preview" />
                       <button type="button" onClick={() => handleRemoveImage(i)} className="absolute inset-0 bg-red-600/60 text-white text-[9px] font-bold opacity-0 group-hover:opacity-100 flex items-center justify-center">X</button>
                     </div>
-                    <input 
-                      type="text" 
-                      value={p.alt} 
+                    <input
+                      type="text"
+                      value={p.alt}
                       onChange={(e) => handleUpdateSingleAlt(i, e.target.value)}
                       placeholder="Alt Text"
                       className="w-full text-xs border rounded py-1 px-2 focus:border-blue-400 outline-none"
@@ -332,13 +332,13 @@ const PhotosGallery = () => {
             <h3 className="text-base font-medium text-gray-800">Photo Gallery List</h3>
             <div className="flex items-center gap-2">
               <span className="text-xs text-gray-500 font-medium tracking-tight">Filter:</span>
-              <select value={categoryFilter} onChange={e => {setCategoryFilter(e.target.value); setCurrentPage(1)}} className="border border-gray-300 rounded px-2 py-0.5 text-xs bg-white outline-none">
+              <select value={categoryFilter} onChange={e => { setCategoryFilter(e.target.value); setCurrentPage(1) }} className="border border-gray-300 rounded px-2 py-0.5 text-xs bg-white outline-none">
                 <option value="All">All Categories</option>
                 {categoryImages?.map(cat => <option key={cat._id} value={cat.title}>{cat.title}</option>)}
               </select>
             </div>
           </div>
-          
+
           <table className="w-full text-sm text-left text-gray-600">
             <thead className="bg-gray-50 border-b border-gray-200 font-medium">
               <tr>
@@ -380,10 +380,10 @@ const PhotosGallery = () => {
                             _id: item._id,
                             category: item.category,
                             images: [],
-                            imagePreviews: (item.images || []).map(img => ({ 
-                              url: typeof img === 'string' ? img : img.url, 
+                            imagePreviews: (item.images || []).map(img => ({
+                              url: typeof img === 'string' ? img : img.url,
                               alt: typeof img === 'object' ? img.alt : item.image_alt || "",
-                              isNew: false 
+                              isNew: false
                             })),
                             image_alt: item.image_alt || "",
                             status: item.status,
@@ -391,7 +391,7 @@ const PhotosGallery = () => {
                           setIsEdit(true);
                           window.scrollTo({ top: 0, behavior: "smooth" });
                         }}>Edit</button>}
-                        {canDelete && <button className="text-red-600 hover:underline" onClick={() => window.confirm("Delete gallery?") && dispatch(deleteGallery({ id: item._id, user_id: authUser?.id }))}>Delete</button>}
+                        {canDelete && <button className="text-red-600 hover:underline" onClick={() => { dispatch(deleteGallery({ id: item._id, user_id: authUser?.id })); showSuccess("Deleted successfully"); }}>Delete</button>}
                       </div>
                     </td>
                   </tr>
@@ -424,7 +424,7 @@ const PhotosGallery = () => {
               <h2 className="text-base font-bold text-gray-800 uppercase tracking-tight">Manage Gallery: {selectedGalleryForMedia?.category}</h2>
               <button onClick={() => setIsMediaModalOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 text-gray-500 font-bold transition">×</button>
             </div>
-            
+
             <div className="flex-1 flex overflow-hidden">
               <div className="w-1/4 bg-gray-50 p-6 border-r border-gray-100 flex flex-col items-center">
                 <p className="text-xs font-bold text-gray-400 uppercase mb-4 tracking-widest">Bulk Upload</p>
@@ -449,9 +449,9 @@ const PhotosGallery = () => {
                           <button onClick={() => handleModalDelete(img.url)} className="px-4 py-2 bg-white text-red-600 rounded text-xs font-bold hover:bg-red-600 hover:text-white transition uppercase">Delete</button>
                         </div>
                       </div>
-                      <input 
-                        type="text" 
-                        value={img.alt} 
+                      <input
+                        type="text"
+                        value={img.alt}
                         onChange={(e) => handleUpdateModalAlt(i, e.target.value)}
                         placeholder="Caption"
                         className="w-full text-xs border rounded py-1 px-2 focus:border-blue-400 outline-none"
@@ -461,11 +461,11 @@ const PhotosGallery = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
               <button onClick={() => setIsMediaModalOpen(false)} className="px-8 py-1.5 border border-gray-300 rounded font-medium text-sm">Cancel</button>
-              <button 
-                onClick={saveModalChanges} 
+              <button
+                onClick={saveModalChanges}
                 className="px-10 py-1.5 bg-gray-800 text-white rounded font-medium text-sm hover:bg-black transition shadow-lg"
               >Save Changes</button>
             </div>
