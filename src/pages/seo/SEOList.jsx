@@ -175,6 +175,10 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
                 <th className="px-4 py-3 font-medium">S.No</th>
                 <th className="px-4 py-3 font-medium">Page Name</th>
                 <th className="px-4 py-3 font-medium">Meta Title</th>
+                <th className="px-4 py-3 font-medium">OG</th>
+                <th className="px-4 py-3 font-medium">Twitter</th>
+                <th className="px-4 py-3 font-medium">Robots</th>
+                <th className="px-4 py-3 font-medium">Canonical</th>
                 <th className="px-4 py-3 font-medium">Banner </th>
                 <th className="px-4 py-3 font-medium">Status</th>
                 {(canWrite || canDelete) && (
@@ -186,7 +190,7 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
             <tbody>
               {loading && (!seoList || seoList.length === 0) ? (
                 <tr>
-                  <td colSpan="7" className="text-center py-4">
+                  <td colSpan="11" className="text-center py-4">
                     Loading...
                   </td>
                 </tr>
@@ -199,6 +203,50 @@ bg-gradient-to-r from-orange-400 via-cyan-400 to-blue-300"
                     <td className="px-4 py-3">{startIndex + index + 1}.</td>
                     <td className="px-4 py-3 font-medium">{item.page_name}</td>
                     <td className="px-4 py-3">{item.metaTitle}</td>
+                    <td className="px-4 py-3">
+                      {item.og_title || item.og_description ? (
+                        <span
+                          className="px-3 py-1 text-xs rounded-full font-medium bg-blue-100 text-blue-700"
+                          title={item.og_description || "OG Title set"}
+                        >
+                          {item.og_title || "OG Description"}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400 text-xs">Auto</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="text-xs text-gray-600">
+                        {item.twitter_card || "summary_large_image"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`px-3 py-1 text-xs rounded-full font-medium ${
+                          item.robots_index === "noindex" ||
+                          item.robots_follow === "nofollow"
+                            ? "bg-red-100 text-red-700"
+                            : "bg-green-100 text-green-700"
+                        }`}
+                      >
+                        {item.robots_index || "index"},{" "}
+                        {item.robots_follow || "follow"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      {item.canonical_url ? (
+                        <a
+                          href={item.canonical_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline max-w-[200px] truncate inline-block align-bottom"
+                        >
+                          {item.canonical_url}
+                        </a>
+                      ) : (
+                        <span className="text-gray-400">Auto</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3">
                       <img
                         src={item?.page_banner || "/placeholder.png"}

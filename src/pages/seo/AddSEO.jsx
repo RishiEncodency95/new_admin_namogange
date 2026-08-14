@@ -9,6 +9,9 @@ import { fetchObjectives } from "../../redux/slices/objective/objectiveSlice";
 import { getAllInitiatives } from "../../redux/slices/initiativeSlice";
 import { PAGES_LIST } from "../../utils/pagesList";
 
+const SITE_URL =
+  import.meta.env.VITE_SITE_URL || "https://namogange.org";
+
 const AddSEO = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
@@ -32,8 +35,15 @@ const AddSEO = () => {
     banner_alt: "",
     open_graph: null,
     open_graph_preview: "",
+    og_title: "",
+    og_description: "",
+    twitter_card: "summary_large_image",
     openGraphTags: "",
     schemaMarkup: "",
+    canonical_url: "",
+    use_custom_canonical: false,
+    robots_index: "index",
+    robots_follow: "follow",
     status: "Active",
   });
 
@@ -86,8 +96,15 @@ const AddSEO = () => {
         banner_alt: state.banner_alt || "",
         open_graph: null,
         open_graph_preview: state.open_graph || "",
+        og_title: state.og_title || "",
+        og_description: state.og_description || "",
+        twitter_card: state.twitter_card || "summary_large_image",
         openGraphTags: state.openGraphTags || "",
         schemaMarkup: state.schemaMarkup || "",
+        canonical_url: state.canonical_url || "",
+        use_custom_canonical: Boolean(state.canonical_url),
+        robots_index: state.robots_index || "index",
+        robots_follow: state.robots_follow || "follow",
         status: state.status || "Active",
       });
       setShowHomeFields(state.page_path === "/");
@@ -189,8 +206,14 @@ const AddSEO = () => {
     submitData.append("metaKeywords", formData.metaKeywords);
     submitData.append("metaDescription", formData.metaDescription);
     submitData.append("banner_alt", formData.banner_alt);
+    submitData.append("og_title", formData.og_title || "");
+    submitData.append("og_description", formData.og_description || "");
+    submitData.append("twitter_card", formData.twitter_card || "summary_large_image");
     submitData.append("openGraphTags", formData.openGraphTags);
     submitData.append("schemaMarkup", formData.schemaMarkup);
+    submitData.append("canonical_url", formData.canonical_url || "");
+    submitData.append("robots_index", formData.robots_index || "index");
+    submitData.append("robots_follow", formData.robots_follow || "follow");
     submitData.append("status", formData.status);
     submitData.append("user_id", currentUserId);
     submitData.append("user_name", currentUserName);
@@ -269,6 +292,10 @@ const AddSEO = () => {
                       ...prev,
                       page_name: selected?.name || "",
                       page_path: selected?.path || "",
+                      canonical_url:
+                        prev.use_custom_canonical && prev.canonical_url
+                          ? prev.canonical_url
+                          : `${SITE_URL}${selected?.path || ""}`,
                     }));
                   }}
                   className={inputClass}
@@ -393,7 +420,7 @@ const AddSEO = () => {
             </div>
 
             {/* Row 3: OG Image & Meta Description */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Open Graph Image <span className="text-red-500">*</span>
@@ -418,6 +445,32 @@ const AddSEO = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
+                  OG Title
+                </label>
+                <input
+                  type="text"
+                  name="og_title"
+                  value={formData.og_title}
+                  onChange={handleChange}
+                  className={inputClass}
+                  placeholder="Enter OG title (defaults to meta title)"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  OG Description
+                </label>
+                <textarea
+                  name="og_description"
+                  value={formData.og_description}
+                  onChange={handleChange}
+                  className={inputClass}
+                  placeholder="Enter OG description (defaults to meta description)"
+                  rows="1"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Meta Description <span className="text-red-500">*</span>
                   <span className="text-xs text-gray-500 ml-2">
                     ({formData.metaDescription.length}/155)
@@ -433,6 +486,114 @@ const AddSEO = () => {
                   maxLength={155}
                   required
                 />
+              </div>
+            </div>
+
+            {/* Row: Twitter Card */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Twitter Card Type
+                </label>
+                <select
+                  name="twitter_card"
+                  value={formData.twitter_card}
+                  onChange={handleChange}
+                  className={inputClass}
+                >
+                  <option value="summary_large_image">summary_large_image (recommended)</option>
+                  <option value="summary">summary</option>
+                  <option value="app">app</option>
+                  <option value="player">player</option>
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  Twitter/X par card kaise dikhega
+                </p>
+              </div>
+            </div>
+
+            {/* Row: Canonical & Robots */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="md:col-span-1">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Canonical URL
+                  <span className="text-xs text-gray-500 ml-2">
+                    (auto-generated)
+                  </span>
+                </label>
+                <div className="flex items-center gap-2 mb-1">
+                  <input
+                    type="checkbox"
+                    id="use_custom_canonical"
+                    checked={formData.use_custom_canonical}
+                    onChange={(e) => {
+                      const checked = e.target.checked;
+                      setFormData((prev) => ({
+                        ...prev,
+                        use_custom_canonical: checked,
+                        canonical_url: checked
+                          ? prev.canonical_url
+                          : `${SITE_URL}${prev.page_path}`,
+                      }));
+                    }}
+                    className="h-4 w-4"
+                  />
+                  <label
+                    htmlFor="use_custom_canonical"
+                    className="text-xs text-gray-600"
+                  >
+                    Custom canonical
+                  </label>
+                </div>
+                <input
+                  type="text"
+                  name="canonical_url"
+                  value={formData.canonical_url}
+                  onChange={handleChange}
+                  readOnly={!formData.use_custom_canonical}
+                  className={`${inputClass} ${
+                    !formData.use_custom_canonical
+                      ? "bg-gray-100 cursor-not-allowed"
+                      : ""
+                  }`}
+                  placeholder="https://namogange.org/about"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Robots Index <span className="text-red-500">*</span>
+                </label>
+                <select
+                  name="robots_index"
+                  value={formData.robots_index}
+                  onChange={handleChange}
+                  className={inputClass}
+                >
+                  <option value="index">index</option>
+                  <option value="noindex">noindex</option>
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  noindex = Google par ye page nahi dikhega
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Robots Follow <span className="text-red-500">*</span>
+                </label>
+                <select
+                  name="robots_follow"
+                  value={formData.robots_follow}
+                  onChange={handleChange}
+                  className={inputClass}
+                >
+                  <option value="follow">follow</option>
+                  <option value="nofollow">nofollow</option>
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  nofollow = links follow nahi honge
+                </p>
               </div>
             </div>
 
